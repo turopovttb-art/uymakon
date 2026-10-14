@@ -116,7 +116,7 @@ app.post('/api/notify-admin', async (req, res) => {
 });
 
 // Asosiy sahifani ochib berish
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
