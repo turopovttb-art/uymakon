@@ -1,11 +1,11 @@
-// ID ni sayt o'zi xotirasida saqlab turadi
-let autoUserToken = "";
-
 function openModal() { 
-    // Sayt avtomat tasodifiy raqam yaratadi
-    autoUserToken = Math.floor(10000 + Math.random() * 90000).toString();
+    // ID ni telefon xotirasidan qidiramiz, yo'q bo'lsa yangi yaratamiz
+    let autoUserToken = localStorage.getItem("userToken");
+    if (!autoUserToken) {
+        autoUserToken = Math.floor(10000 + Math.random() * 90000).toString();
+        localStorage.setItem("userToken", autoUserToken);
+    }
     
-    // Sizning botingiz ulangan tayyor havola:
     let telegramLink = `https://t.me/uymakon_auth_bot?start=${autoUserToken}`;
 
     document.getElementById("kadastr-modal").style.display = "flex"; 
@@ -33,6 +33,7 @@ function closeModal() {
 async function checkTelegramCode() { 
     let code = document.getElementById("tg-code-input").value; 
     let res = document.getElementById("modal-result"); 
+    let autoUserToken = localStorage.getItem("userToken"); // Xotiradan ID ni olamiz
     
     if(!code) {
         res.innerHTML = "<span class='error-text'>Iltimos, kodni kiriting!</span>";
@@ -42,7 +43,6 @@ async function checkTelegramCode() {
     res.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Tekshirilmoqda..."; 
     
     try {
-        // Qisqartirilgan manzil: xatolik bermasligi va tez ishlashi uchun
         let response = await fetch('/api/verify-tg-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -53,6 +53,7 @@ async function checkTelegramCode() {
         
         if(data.success) { 
             res.innerHTML = "<span class='success-text'><i class='fas fa-check-circle'></i> Muvaffaqiyatli tasdiqlandi!</span>"; 
+            localStorage.removeItem("userToken"); // Ish bitgach, xotirani tozalaymiz
             setTimeout(showAdForm, 1500); 
         } else { 
             res.innerHTML = "<span class='error-text'>Xato! Kod noto'g'ri.</span>"; 
