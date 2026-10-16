@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UyMakon - Ko'chmas Mulk Platformasi</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -936,9 +936,6 @@
             return R * c;
         }
 
-        // ========================================================
-        // TO'LAQONLI YA Q I N   A T R O F D A G I   X A R I T A
-        // ========================================================
         function openNearbyMapModal() {
             if (!navigator.geolocation) {
                 alert("Brauzeringiz geolokatsiyani qo'llab-quvvatlamaydi.");
@@ -983,7 +980,6 @@
                 nearbyMap.invalidateSize();
             }
 
-            // Foydalanuvchi joylashuvi (Ko'k nishon)
             let userIcon = L.divIcon({
                 className: 'custom-user-icon',
                 html: `<div style="background:#0284c7; width:22px; height:22px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>`,
@@ -995,7 +991,6 @@
                 .bindPopup("<b>📍 Siz turgan joy</b>")
                 .openPopup();
 
-            // Atrofdagi uylarni xaritaga joylash
             let houses = getApprovedHouses().filter(h => h.lat && h.lng);
 
             houses.forEach(h => {
@@ -1216,12 +1211,12 @@
             if(!inputCode) return alert("Kodni kiriting!");
 
             try {
-                let res = await fetch('http://localhost:3000/api/verify-tg-code', {
+                let res = await fetch('/api/verify-tg-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userToken: currentUserToken, code: inputCode })
                 });
-                let data = await res.json();
+                let data = await res.json();    
 
                 if(data.success) {
                     let newId = "UM-" + Math.floor(1000 + Math.random() * 9000);
@@ -1231,14 +1226,15 @@
                     currentUser = newUser;
                     localStorage.setItem("uymakon_user", JSON.stringify(currentUser));
                     document.getElementById("auth-modal").style.display = "none";
-                    checkUserSession(); renderUserChat();
+                    checkUserSession(); 
+                    renderUserChat();
                     updateLandingStats();
                     alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!\nSizning kodingiz: " + newId);
                 } else {
                     alert("Kod xato kiritildi. Qayta urinib ko'ring.");
                 }
-            } catch(err) {
-                alert("Server bilan aloqa yo'q! server.js yoqilganiga ishonch hosil qiling.");
+            } catch (error) {
+                alert("Xato yuz berdi, server bilan ulanishni tekshiring: " + error.message);
             }
         }
 
@@ -1579,15 +1575,17 @@
             });
 
             let rl = document.getElementById("admin-reports-list"); rl.innerHTML = "";
-            if(reportsDB.length === 0) rl.innerHTML = "<p style='color:#94a3b8;'>Hozircha shikoyatlar yo'q.</p>";
-            reportsDB.forEach(r => {
-                rl.innerHTML += `
-                    <div class="admin-item-row">
-                        <div><b>${r.reason}</b><br><span style="font-size:11px; color:#94a3b8;">Mijoz: ${r.user}</span></div>
-                        <button class="del-badge" onclick="deleteReport(${r.id})">O'chirish</button>
-                    </div>
-                `;
-            });
+            if(typeof reportsDB !== 'undefined' && reportsDB.length === 0) rl.innerHTML = "<p style='color:#94a3b8;'>Hozircha shikoyatlar yo'q.</p>";
+            if(typeof reportsDB !== 'undefined') {
+                reportsDB.forEach(r => {
+                    rl.innerHTML += `
+                        <div class="admin-item-row">
+                            <div><b>${r.reason}</b><br><span style="font-size:11px; color:#94a3b8;">Mijoz: ${r.user}</span></div>
+                            <button class="del-badge" onclick="deleteReport(${r.id})">O'chirish</button>
+                        </div>
+                    `;
+                });
+            }
 
             renderAdminChatTabs();
         }
@@ -1605,9 +1603,11 @@
         }
 
         function deleteReport(id) {
-            reportsDB = reportsDB.filter(r => r.id !== id);
-            localStorage.setItem("uymakon_reports", JSON.stringify(reportsDB));
-            renderAdminData();
+            if(typeof reportsDB !== 'undefined') {
+                reportsDB = reportsDB.filter(r => r.id !== id);
+                localStorage.setItem("uymakon_reports", JSON.stringify(reportsDB));
+                renderAdminData();
+            }
         }
 
         function toggleVipStatus(id) {
@@ -1753,10 +1753,3 @@
     </script>
 </body>
 </html>
-<head>
-    <title>UyMakon</title>
-    <!-- Boshqa narsalar... -->
-    
-    <!-- Mana shu kodni qoshasiz: -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-</head>
